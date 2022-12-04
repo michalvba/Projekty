@@ -1,0 +1,379 @@
+from tkinter import *
+from tkinter import ttk
+from tkinter import messagebox
+from tkinter import filedialog
+import pandas as pd
+import matplotlib.pyplot as plt
+import sys
+
+
+Color1 = "#E0E0E0"
+Color2 = "#000000"
+Font = "Segoe UI"
+FontSize = 10
+Top = 60
+
+
+Window = Tk()
+Window.geometry("400x450")
+Window.title("KURSY NBP")
+Window.config(bg=Color1)
+
+
+# FUNKCJE PASKA MENU
+
+def About():
+    About = "Program umożliwia pobranie ze strony NBP średnich kursów walut dla wybranego zakresu dat oraz przedstawienie ich na wykresie."
+    About = About + " Dane można również wyeksportować do plików w formacie *.csv, *.txt oraz do arkusza w Excelu (*.xlsx)."
+    About = About + "\n\n© 2022 by M.S."
+    messagebox.showinfo(title="Kursy NBP - informacje", message=About)
+
+def SaveTo():
+
+    Headers = []
+    Headers.clear()
+    Headers = ["Data"]
+
+    for i in range(0, len(Currency)):
+        Headers.append(Currency[i])
+
+    df = pd.DataFrame()
+
+    if len(Currency) == 1:
+        df = pd.DataFrame(zip(DateList, Rates1), columns=Headers)
+    elif len(Currency) == 2:
+        df = pd.DataFrame(zip(DateList, Rates1, Rates2), columns=Headers)
+    elif len(Currency) == 3:
+        df = pd.DataFrame(zip(DateList, Rates1, Rates2, Rates3), columns=Headers)
+    elif len(Currency) == 4:
+        df = pd.DataFrame(zip(DateList, Rates1, Rates2, Rates3, Rates4), columns=Headers)
+
+    if Text1.compare("end-1c", "==", "1.0"):
+        messagebox.showerror(title="Błąd", message="Błąd: brak danych, które można zapisać.")
+        return
+    file = filedialog.asksaveasfilename(filetypes=[("CSV text file", "*.csv"),
+                                                   ("Text document", "*.txt"),
+                                                   ("MS Excel spreadsheet", "*.xlsx")], defaultextension=".csv")
+    try: extension = file[file.index(".") + 1::]
+    except: return
+    if extension == "xlsx":
+        df.to_excel(file, index=False)
+    elif extension == "csv" or extension == "txt":
+        df.to_csv(file, index=False, sep=";")
+
+
+# PASEK MENU
+
+MenuBar = Menu(Window)
+Window.config(menu=MenuBar)
+
+FileMenu = Menu(MenuBar, tearoff=0)
+MenuBar.add_cascade(label="Plik", menu=FileMenu)
+FileMenu.add_command(label="Zapisz dane jako...", command=SaveTo)
+FileMenu.add_command(label="Zakończ", command=sys.exit)
+
+HelpMenu = Menu(MenuBar, tearoff=0)
+MenuBar.add_cascade(label="Pomoc", menu=HelpMenu)
+HelpMenu.add_command(label="O programie", command=About)
+
+
+# NAPIS TYTUŁOWY
+
+Title = Label(Window,
+              text="KURSY NBP",
+              font=("Georgia", 15, "bold"),
+              fg="#306090",
+              bg=Color1,
+              borderwidth=2,
+              relief="groove")
+Title.place(relx=0.5, y=10, anchor="n")
+
+
+# WIDGETY
+
+Label0 = Label(Window, text="Waluta", bg=Color1, fg=Color2, font=(Font, FontSize + 1))
+Label0.place(x=20, y=Top)
+
+Check1, Check2, Check3, Check4 = IntVar(), IntVar(), IntVar(), IntVar()
+CheckBox1 = Checkbutton(Window, text="USD", variable=Check1, onvalue=1, offvalue=0, bg=Color1, fg=Color2, font=(Font, FontSize), activebackground=Color1)
+CheckBox1.place(x=20, y=Top+25)
+CheckBox2 = Checkbutton(Window, text="EUR", variable=Check2, onvalue=1, offvalue=0, bg=Color1, fg=Color2, font=(Font, FontSize), activebackground=Color1)
+CheckBox2.place(x=80, y=Top+25)
+CheckBox3 = Checkbutton(Window, text="CHF", variable=Check3, onvalue=1, offvalue=0, bg=Color1, fg=Color2, font=(Font, FontSize), activebackground=Color1)
+CheckBox3.place(x=140, y=Top+25)
+CheckBox4 = Checkbutton(Window, text="GBP", variable=Check4, onvalue=1, offvalue=0, bg=Color1, fg=Color2, font=(Font, FontSize), activebackground=Color1)
+CheckBox4.place(x=200, y=Top+25)
+
+
+LabelA = Label(Window, text="Data początkowa", bg=Color1, fg=Color2, font=(Font, FontSize+1))
+LabelA.place(x=20, y=Top+60)
+
+
+Label1 = Label(Window, text="Rok", bg=Color1, fg=Color2, font=(Font, FontSize))
+Label1.place(x=20, y=Top + 90)
+
+ComboBox1 = ttk.Combobox(Window, value=["2018", "2019", "2020", "2021", "2022"])
+ComboBox1.current(0)
+ComboBox1.place(x=100, y=Top + 90, width=60, height=24)
+
+
+Label2 = Label(Window, text="Miesiąc", bg=Color1, fg=Color2, font=(Font, FontSize))
+Label2.place(x=20, y=Top + 120)
+
+Miesiac = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
+ComboBox2 = ttk.Combobox(Window, value=Miesiac)
+ComboBox2.current(0)
+ComboBox2.place(x=100, y=Top + 120, width=60, height=24)
+
+
+Label3 = Label(Window, text="Dzień", bg=Color1, fg=Color2, font=(Font, FontSize))
+Label3.place(x=20, y=Top + 150)
+
+Dzien = []
+for i in range(1, 32): Dzien.append(i)
+ComboBox3 = ttk.Combobox(Window, value=Dzien)
+ComboBox3.current(0)
+ComboBox3.place(x=100, y=Top + 150, width=60, height=24)
+
+
+LabelB = Label(Window, text="Data końcowa", bg=Color1, fg=Color2, font=(Font, FontSize+1))
+LabelB.place(x=220, y=Top+60)
+
+
+Label4 = Label(Window, text="Rok", bg=Color1, fg=Color2, font=(Font, FontSize))
+Label4.place(x=220, y=Top + 90)
+
+ComboBox4 = ttk.Combobox(Window, value=["2018", "2019", "2020", "2021", "2022"])
+ComboBox4.current(4)
+ComboBox4.place(x=300, y=Top + 90, width=60, height=24)
+
+
+Label5 = Label(Window, text="Miesiąc", bg=Color1, fg=Color2, font=(Font, FontSize))
+Label5.place(x=220, y=Top + 120)
+
+Miesiac = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
+ComboBox5 = ttk.Combobox(Window, value=Miesiac)
+ComboBox5.current(11)
+ComboBox5.place(x=300, y=Top + 120, width=60, height=24)
+
+
+Label6 = Label(Window, text="Dzień", bg=Color1, fg=Color2, font=(Font, FontSize))
+Label6.place(x=220, y=Top + 150)
+
+Dzien = []
+for i in range(1, 32): Dzien.append(i)
+ComboBox6 = ttk.Combobox(Window, value=Dzien)
+ComboBox6.current(30)
+ComboBox6.place(x=300, y=Top + 150, width=60, height=24)
+
+
+def multiple_yview(*args):
+    Text1.yview(*args)
+
+Frame1 = Frame(Window)
+Frame1.place(x=20, y=Top+240, width=340, height=84)
+
+Scrollbarl = Scrollbar(Frame1)
+Scrollbarl.pack(side=RIGHT, fill=Y)
+
+Text1 = Text(Frame1, width=40, height=5, yscrollcommand=Scrollbarl.set, wrap="none")
+Text1.pack(side=LEFT)
+Text1.config(state=DISABLED)
+Scrollbarl.config(command=multiple_yview)
+
+
+# Funkcja pobiera kursy ze strony NBP według podanych kryteriów i zapisuje w formie dataframe
+
+DateList = []
+Rates1 = []
+Rates2 = []
+Rates3 = []
+Rates4 = []
+Currency = []
+Currency1 = []
+Currency2 = []
+Colors = []
+
+def PobierzKursy():
+
+    Text1.config(state=NORMAL)
+    Text1.delete(1.0, END)
+
+    Rates1.clear()
+    Rates2.clear()
+    Rates3.clear()
+    Rates4.clear()
+    DateList.clear()
+    Currency.clear()
+    Currency1.clear()
+    Currency2.clear()
+    Colors.clear()
+
+    if Check1.get() == 1:
+        Currency.append("1USD")
+        Colors.append("#30A030")
+    if Check2.get() == 1:
+        Currency.append("1EUR")
+        Colors.append("#2077B0")
+    if Check3.get() == 1:
+        Currency.append("1CHF")
+        Colors.append("#FF8010")
+    if Check4.get() == 1:
+        Currency.append("1GBP")
+        Colors.append("#D62728")
+
+    for i in range(0, len(Currency)):
+        Currency1.append(Currency[i])
+        Currency2.append(Currency[i])
+
+    if Check1.get() + Check2.get() + Check3.get() + Check4.get() == 0 or ComboBox1.get() == "" or ComboBox2.get() == "" or ComboBox3.get() == "" or ComboBox4.get() == "" or ComboBox5.get() == "" or ComboBox6.get() == "":
+        messagebox.showerror(title="Błąd", message="Błąd: nie wybrano walut lub zakresu dat.")
+        return
+
+    # Sprawdza poprawnosc dat
+
+    Year1, Month1, Day1 = str(ComboBox1.get()), str(ComboBox2.get()), str(ComboBox3.get())
+    Year2, Month2, Day2 = str(ComboBox4.get()), str(ComboBox5.get()), str(ComboBox6.get())
+
+    if len(Month1) < 2:
+        Month1 = "0" + Month1
+    if len(Day1) < 2:
+        Day1 = "0" + Day1
+    if len(Month2) < 2:
+        Month2 = "0" + Month2
+    if len(Day2) < 2:
+        Day2 = "0" + Day2
+
+    YearMonthDay1 = Year1 + Month1 + Day1
+    YearMonthDay2 = Year2 + Month2 + Day2
+
+    if YearMonthDay1 > YearMonthDay2:
+        messagebox.showerror(title="Błąd", message="Błąd: nieprawidłowy zakres dat.")
+        return
+
+    # Pobiera dane ze strony NBP i wczytuje do dataframe
+
+    try:
+        df1 = pd.read_csv("https://www.nbp.pl/kursy/Archiwum/archiwum_tab_a_2018.csv", delimiter=";", encoding="ISO-8859-1")
+        df2 = pd.read_csv("https://www.nbp.pl/kursy/Archiwum/archiwum_tab_a_2019.csv", delimiter=";", encoding="ISO-8859-1")
+        df3 = pd.read_csv("https://www.nbp.pl/kursy/Archiwum/archiwum_tab_a_2020.csv", delimiter=";", encoding="ISO-8859-1")
+        df4 = pd.read_csv("https://www.nbp.pl/kursy/Archiwum/archiwum_tab_a_2021.csv", delimiter=";", encoding="ISO-8859-1")
+        df5 = pd.read_csv("https://www.nbp.pl/kursy/Archiwum/archiwum_tab_a_2022.csv", delimiter=";", encoding="ISO-8859-1")
+    except:
+        messagebox.showerror(title="Błąd", message="Błąd: próba pobrania danych ze strony NBP nie powiodła się.")
+        return
+
+    df = pd.concat([df1, df2, df3, df4, df5])
+    df = df.reset_index(drop=True)
+
+    # Usuwa wiersze, ktore nie zawieraja danych kursowych
+
+    delete_list = []
+    for i in range(0, len(df)):
+        x = (df.iloc[i, 0])
+        x = str(x)[0:2]
+        if x != "20":
+            delete_list.append(i)
+
+    for i in delete_list:
+        df = df.drop(index=i)
+
+    df.reset_index(drop=True, inplace=True)
+
+    # Filtruje DF wedlug zakresu dat
+
+    df = df[(df.data>=YearMonthDay1) & (df.data<=YearMonthDay2)]
+    df.reset_index(drop=True, inplace=True)
+
+    # Usuwa kolumny z niepotrzebnymi walutami
+
+    for i in df.columns:
+        if i != "data" and i not in Currency:
+            df.drop(i, axis=1, inplace=True) # X-axis 0, Y-axis 1
+
+    # Konwertuje dane na daty i liczby
+
+    df["data"] = pd.to_datetime(df["data"])
+    df["data"] = df["data"].dt.date
+
+    for i in range(0, len(Currency)):
+        df[Currency[i]] = df[Currency[i]].str.replace(",", ".")
+        df[Currency[i]] = df[Currency[i]].astype(float)
+
+    # Wkleja dane do pola tekstowego
+
+    for i in range(0, len(df)):
+        Text1.insert(END, str(df.iloc[i, 0]))
+        try: Text1.insert(END, " " + str(df.iloc[i, 1]))
+        except: pass
+        try: Text1.insert(END, " " + str(df.iloc[i, 2]))
+        except: pass
+        try: Text1.insert(END, " " + str(df.iloc[i, 3]))
+        except: pass
+        try: Text1.insert(END, " " + str(df.iloc[i, 4]))
+        except: pass
+        Text1.insert(END, "\n")
+
+        DateList.append(df.iloc[i, 0])
+        try: Rates1.append(df.iloc[i, 1])
+        except: pass
+        try: Rates2.append(df.iloc[i, 2])
+        except: pass
+        try: Rates3.append(df.iloc[i, 3])
+        except: pass
+        try: Rates4.append(df.iloc[i, 4])
+        except: pass
+
+    Text1.config(state=DISABLED)
+
+
+Button1 = Button(Window, text="Pobierz kursy", font=(Font, 10), command=PobierzKursy)
+Button1.place(x=20, y=Top+190, width=140, height=30)
+
+
+# Funkcja rysuje wykres
+
+def Graph1():
+
+    try: plt.close()
+    except: pass
+
+    if Text1.compare("end-1c", "==", "1.0"):
+        messagebox.showerror(title="Błąd", message="Błąd: brak danych.")
+        return
+
+    waluty_w_tytule_wykresu = ""
+
+    for i in range(0, len(Currency)):
+        Currency1[i] = Currency[i][1::]
+        Currency2[i] = Currency[i][1::]
+        waluty_w_tytule_wykresu = waluty_w_tytule_wykresu + Currency2[i] + ", "
+        Currency1[i] = Currency1[i] + "/PLN"
+
+    waluty_w_tytule_wykresu = waluty_w_tytule_wykresu[0:len(waluty_w_tytule_wykresu) - 2]
+
+    # plt.style.use("ggplot")
+
+    try: plt.plot(DateList, Rates1, linewidth=2, label=Currency2[0], color=Colors[0])
+    except: pass
+    try: plt.plot(DateList, Rates2, linewidth=2, label=Currency2[1], color=Colors[1])
+    except: pass
+    try: plt.plot(DateList, Rates3, linewidth=2, label=Currency2[2], color=Colors[2])
+    except: pass
+    try: plt.plot(DateList, Rates4, linewidth=2, label=Currency2[3], color=Colors[3])
+    except: pass
+
+    plt.xlabel("Data")
+    plt.ylabel("Średni kurs w PLN")
+    plt.title("Średnie kursy NBP dla " + waluty_w_tytule_wykresu)
+    plt.grid(True)
+    plt.xticks(rotation=30)
+    plt.legend(loc="upper left")
+    plt.tight_layout()
+    plt.show()
+
+Button2 = Button(Window, text="Przedstaw na wykresie", font=(Font, 10), command=Graph1)
+Button2.place(x=20, y=Top+340, width=140, height=30)
+
+
+Window.mainloop()
