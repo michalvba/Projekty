@@ -1,0 +1,65 @@
+Sub Liczby_Pierwsze() 'by M.S.
+
+'Makro znajduje liczby pierwsze w podanym przez uzytkownika zakresie
+
+Dim Poczatek As Long, Koniec As Long
+Dim Counter As Integer
+Dim Check As Byte
+Dim Lista(1 To 2 ^ 20) As Integer
+Dim ListaTekst As String
+
+On Error GoTo ErrorHandler
+
+Poczatek = InputBox("Podaj poczatek zakresu:")
+Koniec = InputBox("Podaj koniec zakresu:")
+
+If Poczatek < 0 Or Koniec < 0 Or Poczatek > Koniec Then
+    MsgBox "Nieprawidlowy zakres."
+    Exit Sub
+ElseIf Koniec < 2 Then
+    MsgBox "Brak liczb pierwszych w podanym zakresie."
+    Exit Sub
+End If
+
+If Poczatek < 2 Then
+    Poczatek = 2
+End If
+
+Counter = 0
+Check = 0
+
+For i = Poczatek To Koniec
+    For j = 2 To i
+        If i Mod j = 0 And i <> j Then
+            Check = 1
+        End If
+    Next
+    If Check = 0 Then
+        Counter = Counter + 1
+        Lista(Counter) = i
+    End If
+    Check = 0
+Next
+
+For i = 1 To Counter
+    ListaTekst = ListaTekst & Lista(i) & ", "
+Next
+
+ListaTekst = "Znaleziono " & Counter & " liczb pierwszych w podanym zakresie:" & vbNewLine & Left(ListaTekst, Len(ListaTekst) - 2) & "."
+ListaTekst = ListaTekst & vbNewLine & vbNewLine & "Czy chcesz wprowadzic liczby do arkusza?"
+
+Pytanie = MsgBox(ListaTekst, vbYesNo)
+
+If Pytanie = vbYes Then
+    Cells(1, 1) = "Liczby pierwsze"
+    For i = 1 To Counter
+       Cells(i + 1, 1) = Lista(i)
+    Next
+End If
+
+Exit Sub
+
+ErrorHandler:
+MsgBox "Wystapil blad."
+
+End Sub
